@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SHARP Studio</title>
+    <meta
+      name="description"
+      content="Premium SHARP Studio GUI for photorealistic Gaussian splat predictions."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="ambient">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="grid"></div>
+    </div>
+
+    <header class="nav">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div>
+          <div class="brand-title">SHARP Studio</div>
+          <div class="brand-subtitle">Gaussian scene builder</div>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <a href="#studio">Studio</a>
+        <a href="#features">Features</a>
+        <a href="#workflow">Workflow</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="ghost" id="scrollToStudio">Launch Studio</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-content">
+          <div class="eyebrow">Single photo to 3D, in seconds</div>
+          <h1>Build a photorealistic Gaussian scene with a single image.</h1>
+          <p class="lead">
+            SHARP Studio wraps the model with a calm, premium workspace. Upload an image,
+            run inference, and take a first-person camera pass through the scene.
+          </p>
+          <div class="hero-actions">
+            <button class="primary" id="primaryCta">Start with a photo</button>
+            <a class="secondary" href="#workflow">See the workflow</a>
+          </div>
+          <div class="hero-meta">
+            <div>
+              <span class="meta-label">Model</span>
+              <span class="meta-value">SHARP Gaussian Predictor</span>
+            </div>
+            <div>
+              <span class="meta-label">Output</span>
+              <span class="meta-value">.ply splats + optional video</span>
+            </div>
+            <div>
+              <span class="meta-label">Best on</span>
+              <span class="meta-value">CUDA for real-time render</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <span>Scene Preview</span>
+            <span class="pill">Live once processed</span>
+          </div>
+          <div class="hero-card-body">
+            <div class="preview-frame">
+              <div class="preview-glow"></div>
+              <div class="preview-placeholder">
+                Drop an image to reveal the scene
+              </div>
+            </div>
+            <div class="hero-card-footer">
+              <div>
+                <div class="meta-label">Status</div>
+                <div class="meta-value">Waiting for input</div>
+              </div>
+              <div>
+                <div class="meta-label">Render</div>
+                <div class="meta-value">Optional video pass</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="studio" id="studio">
+        <div class="panel panel-upload">
+          <div class="panel-header">
+            <h2>Upload your image</h2>
+            <p>Drag and drop a photo or browse from disk.</p>
+          </div>
+          <form id="predictForm" class="studio-form">
+            <label class="dropzone" data-dropzone>
+              <input
+                id="imageInput"
+                name="images"
+                type="file"
+                accept="image/*"
+                multiple
+              />
+              <div class="dropzone-content">
+                <div class="dropzone-icon">+</div>
+                <div>
+                  <div class="dropzone-title">Drop images here</div>
+                  <div class="dropzone-subtitle">HEIC, JPG, PNG, TIFF supported</div>
+                </div>
+              </div>
+            </label>
+
+            <div class="upload-meta" id="uploadMeta">No files selected</div>
+            <div class="input-gallery" id="inputGallery"></div>
+
+            <div class="option-grid">
+              <div class="option">
+                <label for="deviceSelect">Device</label>
+                <select id="deviceSelect" name="device">
+                  <option value="default" selected>Auto select</option>
+                  <option value="cuda">CUDA</option>
+                  <option value="mps">Apple MPS</option>
+                  <option value="cpu">CPU</option>
+                </select>
+              </div>
+              <div class="option" id="checkpointOption">
+                <label for="checkpointInput">Custom checkpoint</label>
+                <input
+                  id="checkpointInput"
+                  name="checkpoint"
+                  type="file"
+                  accept=".pt"
+                />
+                <span class="hint">Leave empty to use the default model</span>
+                <label class="toggle toggle-compact" id="unsafeCheckpointRow" hidden>
+                  <input
+                    id="unsafeCheckpointToggle"
+                    type="checkbox"
+                    name="unsafe_checkpoint"
+                  />
+                  <span class="toggle-ui"></span>
+                  <span class="toggle-label">Allow unsafe checkpoint loading</span>
+                </label>
+                <span class="hint hint-warning" id="unsafeCheckpointHint" hidden>
+                  Only enable for trusted files.
+                </span>
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <label class="toggle">
+                <input id="renderToggle" type="checkbox" name="render" />
+                <span class="toggle-ui"></span>
+                <span class="toggle-label">Render camera path video (CUDA only)</span>
+              </label>
+            </div>
+
+            <button class="primary full" type="submit" id="submitButton">
+              <span class="btn-label">Create 3D Gaussian Scene</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
+            <div class="form-note">Large images may take longer to process.</div>
+          </form>
+        </div>
+
+        <div class="panel panel-status" id="workflow">
+          <div class="panel-header">
+            <h2>Workflow</h2>
+            <p>Follow the pipeline as SHARP builds your scene.</p>
+          </div>
+          <ul class="progress" id="progressList">
+            <li data-stage="prepare">
+              <span>Prepare image</span>
+              <em>Pending</em>
+            </li>
+            <li data-stage="predict">
+              <span>Predict Gaussian splats</span>
+              <em>Pending</em>
+            </li>
+            <li data-stage="render">
+              <span>Render camera path</span>
+              <em>Optional</em>
+            </li>
+            <li data-stage="bundle">
+              <span>Bundle outputs</span>
+              <em>Pending</em>
+            </li>
+          </ul>
+          <div class="status-card">
+            <div class="status-title">Status</div>
+            <div class="status-message" id="statusMessage">
+              Ready. Upload an image to begin.
+            </div>
+            <div class="status-sub" id="statusSub">Output files will appear here.</div>
+          </div>
+          <div class="warning" id="warningBox" hidden></div>
+        </div>
+
+        <div class="panel panel-output">
+          <div class="panel-header">
+            <h2>Results</h2>
+            <p>Download your splats or preview the rendered pass.</p>
+          </div>
+          <div class="output-folder">
+            <div>
+              <div class="meta-label">Output folder</div>
+              <div class="output-path" id="outputPath">Loading...</div>
+            </div>
+            <div class="output-actions">
+              <button class="ghost" type="button" id="setOutputFolder">Set output folder</button>
+              <button class="ghost" type="button" id="openOutputFolder">Open output folder</button>
+            </div>
+          </div>
+          <div class="panel-hint">Tip: click any preview to open a full-screen view.</div>
+          <div class="preview-grid" id="previewGrid"></div>
+          <div class="result-actions">
+            <a class="primary" id="bundleLink" href="#" hidden>Download bundle</a>
+          </div>
+          <div class="result-list" id="resultList"></div>
+        </div>
+      </section>
+
+      <section class="features" id="features">
+        <div class="feature-card">
+          <h3>Metric camera paths</h3>
+          <p>
+            The model produces absolute scale, enabling realistic dolly and orbit paths without
+            manual tuning.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3>Photorealistic splats</h3>
+          <p>
+            SHARP regresses 3D Gaussian splats directly from a single image for fast, sharp results.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3>Local and private</h3>
+          <p>
+            Everything runs locally. Keep scenes on-device and export standard .ply splat files.
+          </p>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div>
+          <h2>Designed for a calm, focused workflow.</h2>
+          <p>
+            A single panel for uploads, a live workflow tracker, and clean outputs you can take to
+            any renderer.
+          </p>
+        </div>
+        <button class="primary" id="secondaryCta">Build your first scene</button>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>SHARP Studio GUI</span>
+      <span>Apple-style, locally hosted</span>
+    </footer>
+
+    <div class="lightbox" id="lightbox" hidden>
+      <div class="lightbox-backdrop" data-close></div>
+      <div class="lightbox-content">
+        <button class="lightbox-close" type="button" data-close>Close</button>
+        <div class="lightbox-media" id="lightboxMedia"></div>
+        <div class="lightbox-caption" id="lightboxCaption"></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

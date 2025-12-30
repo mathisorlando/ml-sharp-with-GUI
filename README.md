@@ -66,6 +66,25 @@ sharp predict -i /path/to/input/images -o /path/to/output/gaussians --render
 sharp render -i /path/to/output/gaussians -o /path/to/output/renderings
 ```
 
+## Using the GUI
+
+Launch the local SHARP Studio GUI:
+
+```
+sharp gui --host 127.0.0.1 --port 7860
+```
+
+By default, outputs are saved under `~/Documents/SHARP Studio/Outputs` (or `~/SHARP Studio/Outputs`
+if `Documents` is unavailable). You can override this with:
+
+```
+sharp gui --output-path /path/to/output/gui
+```
+
+You can also set or open the output folder directly from the GUI.
+
+Note: video rendering in the GUI still requires a CUDA GPU.
+
 ## Evaluation
 
 Please refer to the paper for both quantitative and qualitative evaluations.
